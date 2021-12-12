@@ -3,252 +3,267 @@
 #endif
 
 #include <gtk/gtk.h>
-
+#include "reclam.h"
 #include "callbacks.h"
 #include "interface.h"
 #include "support.h"
-#include "stock.h"
 
 
-void
-on_button4_ref_home_clicked                 (GtkWidget       *objet_graphique,
-                                        gpointer         user_data)
+void on_button1_recherche_clicked (GtkWidget *objet_graphique ,gpointer user_data)
 {
-GtkWidget *treeview1, *ref_tree;
-
-
-ref_tree=lookup_widget(objet_graphique,"window_prod_home");
-
-gtk_widget_destroy(ref_tree);
-ref_tree=lookup_widget(objet_graphique,"window_prod_home");
-ref_tree=create_window_prod_home();
-
-gtk_widget_show(ref_tree);
-
-treeview1=lookup_widget(ref_tree,"treeview1_home_list");
-
-Display_Stock(treeview1,"stock.txt");
-}
-
-
-void
-on_button5_search_prod_clicked              (GtkWidget       *objet_graphique,
-                                        gpointer         user_data)
-{
-GtkWidget *windowAuth;
-windowAuth=create_window_search_prod();
-gtk_widget_show (windowAuth);
-}
-
-
-void
-on_button2_add_prod_clicked                (GtkWidget       *objet_graphique,
-                                        gpointer         user_data)
-{
-stock p;
-
-GtkWidget *input1,*input2,*input3,*input4,*input5,*input6,*input7,*input8;
-GtkWidget *interface;
-interface=lookup_widget(objet_graphique, "window_prod_home");
-
-input1=lookup_widget(objet_graphique,"entry1_add_prod");
-input2=lookup_widget(objet_graphique,"entry2_add_prod"); 
-input3=lookup_widget ( objet_graphique,"entry3_add_prod" );
-input4=lookup_widget(objet_graphique,"spinbutton9_add_prod"); 
-input5=lookup_widget(objet_graphique,"spinbutton2_add_prod");
-input6=lookup_widget(objet_graphique,"spinbutton3_add_prod");
-input7=lookup_widget(objet_graphique,"spinbutton4_add_prod");
-input8=lookup_widget(objet_graphique,"entry4_add_prod");
-
-strcpy(p.identifiant,gtk_entry_get_text(GTK_ENTRY(input1)));
-strcpy(p.nom,gtk_entry_get_text(GTK_ENTRY(input2)));
-strcpy(p.prix,gtk_entry_get_text(GTK_ENTRY(input3))); 
-p.quantite=gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(input4));
-p.date.jour=gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(input5));
-p.date.moins=gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(input6));
-p.date.annee=gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(input7));
-strcpy(p.place,gtk_entry_get_text(GTK_ENTRY(input8)));
-
-Add_Product(p);
-
-}
-
-
-void
-on_button3_disp_out_prod_clicked                 (GtkWidget       *objet_graphique,
-                                        gpointer         user_data)
-{
-GtkWidget *w1; GtkWidget *treeview3;
-w1=lookup_widget(objet_graphique,"window_prod_home"); 
-
-gtk_widget_show(w1);
-
-
-treeview3=lookup_widget(w1,"treeview3_show_out");
-
-Display_Stock(treeview3,"rupture.txt");
-}
-
-
-void
-on_treeview1_home_list_row_activated             (GtkTreeView *treeview1_home_list,GtkTreePath *path, GtkTreeViewColumn *column, gpointer    user_data)
-{
-GtkTreeIter iter; gchar *identifiant;GtkWidget *msgInfo;
-stock p;
-
-GtkTreeModel *model = gtk_tree_view_get_model(treeview1_home_list);
-if (gtk_tree_model_get_iter(model, &iter, path)) {
-gtk_tree_model_get (GTK_LIST_STORE(model), &iter, 0, &identifiant,-1);
-
-strcpy(p.identifiant,identifiant);
-
-
-delete_Product(p,"stock.txt");
-Display_Stock(treeview1_home_list,"stock.txt");
-msgInfo=gtk_message_dialog_new(GTK_WINDOW(user_data),GTK_DIALOG_MODAL,GTK_MESSAGE_INFO,GTK_BUTTONS_OK,"Product succesfully deleted");
-	switch(gtk_dialog_run(GTK_DIALOG(msgInfo)))
-	{
-	case GTK_RESPONSE_OK:
-	gtk_widget_destroy(msgInfo);
-	break;
-	}
-}
-}
-
-
-void
-on_button6_search_prod_clicked                     (GtkWidget       *objet_graphique,
-                                        gpointer         user_data)
-{
-int v;
-char id[20],date_achat[40],quantite[20];
-GtkWidget *txt1, *txt2, *txt3, *txt4, *txt5, *txt6;
-GtkWidget *iden,*dialog;
-
-iden=lookup_widget(objet_graphique,"entry5_search_prod"); 
-strcpy(id,gtk_entry_get_text(GTK_ENTRY(iden)));
-txt1=lookup_widget(objet_graphique,"label5_search_prod");
-txt2=lookup_widget(objet_graphique,"label6_search_prod");
-txt3=lookup_widget(objet_graphique,"label7_search_prod");
-txt4=lookup_widget(objet_graphique,"label8_search_prod");
-txt5=lookup_widget(objet_graphique,"checkbutton1_stockA");
-txt6=lookup_widget(objet_graphique,"checkbutton2_stockB");
-
-stock p=search_product(id,"stock.txt",&v);
-
-if (v==-1){
-dialog=gtk_message_dialog_new(GTK_WINDOW(user_data),GTK_DIALOG_MODAL,GTK_MESSAGE_ERROR,GTK_BUTTONS_OK,"Incorrect ID");
-switch(gtk_dialog_run(GTK_DIALOG(dialog)))
-	{
-	case GTK_RESPONSE_OK:
-	gtk_widget_destroy(dialog);
-	break;
-	}
-}
-else {
-gtk_label_set_text(GTK_LABEL(txt1),p.nom);
-gtk_label_set_text(GTK_LABEL(txt2),p.prix);
-sprintf(quantite,"%d",p.quantite);
-sprintf(date_achat,"%d/%d/%d",p.date.jour,p.date.moins,p.date.annee);
-gtk_label_set_text(GTK_LABEL(txt3),quantite);
-gtk_label_set_text(GTK_LABEL(txt4),date_achat);
-if(strcmp(p.place,"StockA")==0)
-gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(txt5),TRUE);
+GtkWidget *cin,*treeview_reclam;
+char cin1[20];
+cin=lookup_widget(objet_graphique,"entry1_recherche");	treeview_reclam=lookup_widget(objet_graphique,"treeview_reclam");
+strcpy(cin1,gtk_entry_get_text(GTK_ENTRY(cin)));
+if(strcmp(cin1,"")!=0)
+  {
+   recherche_reclam(cin1);
+   afficher_reclam(treeview_reclam,"recherche.txt");
+   remove("recherche.txt");
+  }
 else
-gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(txt6),TRUE);
-
-}
+   afficher_reclam(treeview_reclam,"reclam.txt");
 }
 
-
-void
-on_verif_id_prod_clicked                    (GtkWidget       *objet_graphique,
-                                        gpointer         user_data)
+void on_button2_ajout_rec_clicked (GtkWidget *objet_graphique ,gpointer user_data)
 {
-int v;
-char id[20];
-GtkWidget *txt1, *txt2, *txt3, *txt4a,*txt4b,*txt4c, *txt5, *txt6, *txt7;
-GtkWidget *iden,*dialog;
+GtkWidget *window_afficher,*window_gestion,*treeview_reclam;
 
-iden=lookup_widget(objet_graphique,"repl1"); 
-strcpy(id,gtk_entry_get_text(GTK_ENTRY(iden)));
-txt1=lookup_widget(objet_graphique,"repl2");
-txt2=lookup_widget(objet_graphique,"repl3");
-txt3=lookup_widget(objet_graphique,"spinbutton5_mod_prod");
-txt4a=lookup_widget(objet_graphique,"spinbutton6_mod_prod");
-txt4b=lookup_widget(objet_graphique,"spinbutton7_mod_prod");
-txt4c=lookup_widget(objet_graphique,"spinbutton8_mod_prod");
-txt5=lookup_widget(objet_graphique,"stockA");
-txt6=lookup_widget(objet_graphique,"stockB");
-txt7=lookup_widget(objet_graphique,"entry24_mod_prod");
+window_afficher=lookup_widget(objet_graphique,"window_afficher");
+window_gestion=lookup_widget(objet_graphique,"window_gestion");
+gtk_widget_destroy(window_afficher);
+window_gestion=create_window_gestion();
+gtk_widget_show(window_gestion);
+}
 
+void on_button3_modif_rec_clicked (GtkWidget *objet_graphique,gpointer         user_data)
+{
 
-stock p=search_product(id,"stock.txt",&v);
+GtkWidget *window_gestion,*window_afficher;
+GtkTreeModel     *model;
+GtkTreeSelection *selection;
+GtkTreeIter iter;
+GtkWidget* treeview;
+	
+	
+gchar* id;
+gchar* cin;
+gchar* nom;
+gchar* prenom;
+gchar* text;
+gint satisfaction;
+gint education;
+gint jour;
+gint mois;
+gint annee;
+gint type;
 
-if (v==-1){
-dialog=gtk_message_dialog_new(GTK_WINDOW(user_data),GTK_DIALOG_MODAL,GTK_MESSAGE_ERROR,GTK_BUTTONS_OK,"Incorrect ID");
-switch(gtk_dialog_run(GTK_DIALOG(dialog)))
-	{
-	case GTK_RESPONSE_OK:
-	gtk_widget_destroy(dialog);
-	break;
+window_afficher=lookup_widget(objet_graphique,"window_afficher");
+treeview=lookup_widget(window_afficher,"treeview_reclam");
+selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(treeview));
+if (gtk_tree_selection_get_selected(selection, &model, &iter))
+   {
+    gtk_tree_model_get (model,&iter,0,&id,1,&cin,2,&nom,3,&prenom,4,&type,5,&jour,6,&mois,7,&annee,8,&text,9,&satisfaction,10,&education,-1);
+    gtk_widget_destroy(window_afficher);
+		         window_gestion=lookup_widget(objet_graphique,"window_gestion");
+window_gestion=create_window_gestion();
+gtk_widget_show(window_gestion);
+	        gtk_entry_set_text(GTK_ENTRY(lookup_widget(window_gestion,"entry2_id_rec")),id);
+                gtk_entry_set_text(GTK_ENTRY(lookup_widget(window_gestion,"entry3_cin_rec")),cin);
+                gtk_entry_set_text(GTK_ENTRY(lookup_widget(window_gestion,"entry4_nom_rec")),nom);
+		gtk_entry_set_text(GTK_ENTRY(lookup_widget(window_gestion,"entry5_prenom_rec")),prenom);
+		gtk_entry_set_text(GTK_ENTRY(lookup_widget(window_gestion,"entry6_text_rec")),text);
+		gtk_spin_button_set_value(GTK_SPIN_BUTTON(lookup_widget(window_gestion,"spinbutton1_jour")),jour);
+		gtk_spin_button_set_value(GTK_SPIN_BUTTON(lookup_widget(window_gestion,"spinbutton2_mois")),mois);
+		gtk_spin_button_set_value(GTK_SPIN_BUTTON(lookup_widget(window_gestion,"spinbutton3_annee")),annee);
+		gtk_combo_box_set_active(GTK_COMBO_BOX(lookup_widget(window_gestion,"combobox_rec")),type);
+
 	}
 }
-else {
 
-gtk_entry_set_text(GTK_ENTRY(txt1),p.nom);
-gtk_entry_set_text(GTK_ENTRY(txt1),p.nom);
-gtk_entry_set_text(GTK_ENTRY(txt2),p.prix);
-gtk_spin_button_set_value(txt3,p.quantite);
-gtk_spin_button_set_value(txt4a,p.date.jour);
-gtk_spin_button_set_value(txt4b,p.date.moins);
-gtk_spin_button_set_value(txt4c,p.date.annee);
-if(strcmp(p.place,"StockA")==0)
-gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(txt5),TRUE);
+void on_button4_supp_rec_clicked (GtkWidget *objet_graphique,gpointer         user_data)
+{
+GtkWidget *window_gestion,*window_afficher;
+GtkTreeModel  *model;
+GtkTreeSelection *selection;
+GtkTreeIter iter;
+GtkWidget* treeview;
+		
+gchar* id;
+		window_afficher=lookup_widget(objet_graphique,"window_afficher");
+treeview=lookup_widget(window_afficher,"treeview_reclam");
+selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(treeview));
+if (gtk_tree_selection_get_selected(selection, &model, &iter))
+  {
+   gtk_tree_model_get (model,&iter,0,&id,-1);
+   supprimer_reclam(id);
+   afficher_reclam(treeview,"reclam.txt");
+		
+  }
+}
+
+int x,y;
+void on_radiobutton1_satisfait_toggled (GtkToggleButton *togglebutton, gpointer user_data)
+{
+ if(gtk_toggle_button_get_active(GTK_RADIO_BUTTON(togglebutton)))
+    x=0;
+}
+
+
+void on_radiobutton2_non_satisfait_toggled (GtkToggleButton *togglebutton, gpointer user_data)
+{
+if(gtk_toggle_button_get_active(GTK_RADIO_BUTTON(togglebutton)))
+    x=1;
+}
+
+
+void on_checkbutton1_prep_toggled (GtkToggleButton *togglebutton, gpointer     user_data)
+{
+if(gtk_toggle_button_get_active(togglebutton))
+    y=0;
+}
+
+
+void on_checkbutton2_cycle_ing_toggled (GtkToggleButton *togglebutton,
+gpointer user_data)
+{
+if(gtk_toggle_button_get_active(togglebutton))
+    y=1;
+}
+
+
+void on_checkbutton3_business_toggled (GtkToggleButton *togglebutton,
+gpointer user_data)
+{
+if(gtk_toggle_button_get_active(togglebutton))
+    y=2;
+}
+
+
+void on_button6_ajouter_clicked (GtkWidget *objet_graphique, gpointer user_data)
+{
+reclam r;
+GtkWidget *id,*cin,*nom,*prenom,*type,*text_reclamation,*jour,*mois,*annee;
+
+id=lookup_widget(objet_graphique,"entry2_id_rec");
+cin=lookup_widget(objet_graphique,"entry3_cin_rec");
+nom=lookup_widget(objet_graphique,"entry4_nom_rec");
+prenom=lookup_widget(objet_graphique,"entry5_prenom_rec");
+type=lookup_widget(objet_graphique,"combobox_rec");
+text_reclamation=lookup_widget(objet_graphique,"entry6_text_rec");
+jour=lookup_widget(objet_graphique,"spinbutton1_jour");
+mois=lookup_widget(objet_graphique,"spinbutton2_mois");
+annee=lookup_widget(objet_graphique,"spinbutton3_annee");
+strcpy(r.id,gtk_entry_get_text(GTK_ENTRY(id)));
+strcpy(r.cin,gtk_entry_get_text(GTK_ENTRY(cin)));
+strcpy(r.nom,gtk_entry_get_text(GTK_ENTRY(nom)));
+strcpy(r.prenom,gtk_entry_get_text(GTK_ENTRY(prenom)));
+strcpy(r.text_reclamation,gtk_entry_get_text(GTK_ENTRY(text_reclamation)));
+r.d.jour=gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(jour));
+r.d.mois=gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(mois));
+r.d.annee=gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(annee));
+if(strcmp("Service hebergement" ,gtk_combo_box_get_active_text(GTK_COMBO_BOX(type)))==0)
+   r.type=0;
 else
-gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(txt6),TRUE);
-gtk_entry_set_text(GTK_ENTRY(txt7),id);
+   r.type=1;
+   r.satisfaction=x;
+   r.education=y;
+if(existe(r.id)==0)
+  {	
+   ajouter_reclam(r);
+   GtkWidget *dialog_ok_aj;
+   dialog_ok_aj=create_dialog_ok_aj() ;
+   gtk_widget_show(dialog_ok_aj) ;
+  }
+else
+  {
+  GtkWidget *dialog_pb_aj;
+  dialog_pb_aj=create_dialog_pb_aj() ;
+  gtk_widget_show(dialog_pb_aj) ;
+  }
 }
-}
 
 
-
-void
-on_button9_mod_prod_clicked                     (GtkWidget       *objet_graphique,
-                                        gpointer         user_data)
+void on_button7_modifier_clicked (GtkWidget *objet_graphique,gpointer user_data)
 {
-stock p;
-GtkWidget *txt1, *txt2, *txt3, *txt4a,*txt4b,*txt4c, *txt5, *txt6;
-GtkWidget *iden,*dialog;
+reclam r;
+int ex=1;
+GtkWidget *id,*cin,*nom,*prenom,*type,*text_reclamation,*jour,*mois,*annee;
 
-iden=lookup_widget(objet_graphique,"entry24_mod_prod");
-txt1=lookup_widget(objet_graphique,"repl2");
-txt2=lookup_widget(objet_graphique,"repl3");
-txt3=lookup_widget(objet_graphique,"spinbutton5_mod_prod");
-txt4a=lookup_widget(objet_graphique,"spinbutton6_mod_prod");
-txt4b=lookup_widget(objet_graphique,"spinbutton7_mod_prod");
-txt4c=lookup_widget(objet_graphique,"spinbutton8_mod_prod");
-txt5=lookup_widget(objet_graphique,"stockA");
-txt6=lookup_widget(objet_graphique,"stockB");
-
-
-strcpy(p.identifiant,gtk_entry_get_text(GTK_ENTRY(iden)));
-strcpy(p.nom,gtk_entry_get_text(GTK_ENTRY(txt1)));
-strcpy(p.prix,gtk_entry_get_text(GTK_ENTRY(txt2)));
-p.quantite=gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(txt3));
-p.date.jour=gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(txt4a));
-p.date.moins=gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(txt4b));
-p.date.annee=gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(txt4c));
-strcpy(p.place,gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(txt5))==1?"StockA":"StockB");
-modifier(p,"stock.txt");
-dialog=gtk_message_dialog_new(GTK_WINDOW(user_data),GTK_DIALOG_MODAL,GTK_MESSAGE_INFO,GTK_BUTTONS_OK,"Product Succesfully Modified");
-	switch(gtk_dialog_run(GTK_DIALOG(dialog)))
-	{
-	case GTK_RESPONSE_OK:
-	gtk_widget_destroy(dialog);
-	break;
-	}
+id=lookup_widget(objet_graphique,"entry2_id_rec");
+cin=lookup_widget(objet_graphique,"entry3_cin_rec");
+nom=lookup_widget(objet_graphique,"entry4_nom_rec");
+prenom=lookup_widget(objet_graphique,"entry5_prenom_rec");
+type=lookup_widget(objet_graphique,"combobox_rec");
+text_reclamation=lookup_widget(objet_graphique,"entry6_text_rec");
+jour=lookup_widget(objet_graphique,"spinbutton1_jour");
+mois=lookup_widget(objet_graphique,"spinbutton2_mois");
+annee=lookup_widget(objet_graphique,"spinbutton3_annee");
+strcpy(r.id,gtk_entry_get_text(GTK_ENTRY(id)));
+strcpy(r.cin,gtk_entry_get_text(GTK_ENTRY(cin)));
+strcpy(r.nom,gtk_entry_get_text(GTK_ENTRY(nom)));
+strcpy(r.prenom,gtk_entry_get_text(GTK_ENTRY(prenom)));
+strcpy(r.text_reclamation,gtk_entry_get_text(GTK_ENTRY(text_reclamation)));
+r.d.jour=gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(jour));
+r.d.mois=gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(mois));
+r.d.annee=gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(annee));
+if(strcmp("Service hebergement",gtk_combo_box_get_active_text(GTK_COMBO_BOX(type)))==0)
+  r.type=0;
+else
+  r.type=1;
+  r.satisfaction=x;
+  r.education=y;
+  ex=existe(r.id);
+if(ex==1)
+  {
+  modifier_reclam(r);
+  GtkWidget *dialog_ok_modif;
+  dialog_ok_modif=create_dialog_ok_modif() ;
+  gtk_widget_show(dialog_ok_modif) ;
+  }
+else
+  {
+  GtkWidget *dialog_pb_modif;
+  dialog_pb_modif=create_dialog_pb_modif() ;
+  gtk_widget_show(dialog_pb_modif) ;
+  }
 }
 
 
+void on_button8_afficher_clicked (GtkWidget *objet_graphique,gpointer user_data)
+{
+GtkWidget *window_afficher,*window_gestion,*treeview_reclam;
+
+window_afficher=lookup_widget(objet_graphique,"window_afficher");
+window_gestion=lookup_widget(objet_graphique,"window_gestion");
+gtk_widget_destroy(window_gestion);
+window_afficher=create_window_afficher();
+gtk_widget_show(window_afficher);
+treeview_reclam=lookup_widget(window_afficher,"treeview_reclam");
+afficher_reclam(treeview_reclam,"reclam.txt");
+}
+
+
+void on_closebutton1_clicked (GtkWidget *objet_graphique, gpointer user_data)
+{
+gtk_widget_destroy(lookup_widget(objet_graphique,"dialog_ok_aj"));
+}
+
+
+void on_closebutton2_clicked (GtkWidget *objet_graphique, gpointer user_data)
+{
+gtk_widget_destroy(lookup_widget(objet_graphique,"dialog_pb_aj"));
+}
+
+
+void on_closebutton3_clicked (GtkWidget *objet_graphique, gpointer user_data)
+{
+gtk_widget_destroy(lookup_widget(objet_graphique,"dialog_ok_modif"));
+}
+
+
+void on_closebutton4_clicked (GtkWidget *objet_graphique, gpointer user_data)
+{
+gtk_widget_destroy(lookup_widget(objet_graphique,"dialog_pb_modif"));
+}
 
